@@ -1,0 +1,20 @@
+{
+    "name":"wa72/url",
+    "description":"Class for handling and manipulating URLs",
+    "homepage":"http://github.com/wasinger/url",
+    "type":"library",
+    "license":"MIT",
+    "authors":[
+        {
+            "name":"Christoph Singer",
+            "email":"singer@webagentur72.de",
+            "homepage":"http://www.webagentur72.de"
+        }
+    ],
+    "autoload":{
+        "psr-0":{
+            "Wa72\\Url":"src/"
+        }
+    }
+}
+

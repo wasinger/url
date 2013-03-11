@@ -1,4 +1,6 @@
 url
 ===
 
-PHP class for handling and manipulating URLs
+PHP class for handling and manipulating URLs.
+
+
