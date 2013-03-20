@@ -163,6 +163,34 @@ class Url
         return $this->user;
     }
 
+    public function getFilename()
+    {
+        return basename($this->path);
+    }
+
+    public function hasQueryParameter($name)
+    {
+        if ($this->query == '') return false;
+        $params = array();
+        parse_str($this->query, $params);
+        return isset($params[$name]);
+    }
+    public function getQueryParameter($name)
+    {
+        if ($this->query == '') return null;
+        $params = array();
+        parse_str($this->query, $params);
+        if (isset($params[$name])) return $params[$name];
+        else return null;
+    }
+    public function setQueryParameter($name, $value)
+    {
+        $params = array();
+        if ($this->query != '') parse_str($this->query, $params);
+        $params[$name] = $value;
+        $this->query = http_build_query($params);
+    }
+
     /**
      * @param Url|string|null $relurl
      */
