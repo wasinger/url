@@ -10,12 +10,12 @@ class UrlTest extends \PHPUnit_Framework_TestCase {
      */
     public function testEqualsQuery()
     {
-        $url1 = Url::create('index.php?a=3&b=5');
+        $url1 = Url::parse('index.php?a=3&b=5');
         $url2 = new Url('index.php?b=5&a=3');
         $this->assertTrue($url1->equalsQuery($url2));
 
         $url1 = new Url('index.php?a=3&b=5&c=asdf');
-        $url2 = Url::create('index.php?b=5&a=3');
+        $url2 = Url::parse('index.php?b=5&a=3');
         $this->assertFalse($url1->equalsQuery($url2));
     }
 
@@ -25,7 +25,7 @@ class UrlTest extends \PHPUnit_Framework_TestCase {
     public function testMakeAbsolute()
     {
         $url1 = new Url('page.php?a=3&b=5');
-        $url2 = Url::create('http://www.test.test/index.html');
+        $url2 = Url::parse('http://www.test.test/index.html');
 
         $this->assertEquals('http://www.test.test/page.php?a=3&b=5', (string) $url1->makeAbsolute($url2));
     }
@@ -81,19 +81,19 @@ class UrlTest extends \PHPUnit_Framework_TestCase {
      */
     public function testGetFilename()
     {
-        $url = Url::create('/asdf/index.html');
+        $url = Url::parse('/asdf/index.html');
         $this->assertEquals('index.html', $url->getFilename());
 
-        $url = Url::create('/asdf/');
+        $url = Url::parse('/asdf/');
         $this->assertEquals('', $url->getFilename());
 
-        $url = Url::create('/foo');
+        $url = Url::parse('/foo');
         $this->assertEquals('foo', $url->getFilename());
 
-        $url = Url::create('foo');
+        $url = Url::parse('foo');
         $this->assertEquals('foo', $url->getFilename());
 
-        $url = Url::create('foo/');
+        $url = Url::parse('foo/');
         $this->assertEquals('', $url->getFilename());
     }
     /**
@@ -101,19 +101,46 @@ class UrlTest extends \PHPUnit_Framework_TestCase {
      */
     public function testGetDirname()
     {
-        $url = Url::create('/asdf/index.html');
+        $url = Url::parse('/asdf/index.html');
         $this->assertEquals('/asdf', $url->getDirname());
 
-        $url = Url::create('/asdf/');
+        $url = Url::parse('/asdf/');
         $this->assertEquals('/asdf', $url->getDirname());
 
-        $url = Url::create('/foo');
+        $url = Url::parse('/foo');
         $this->assertEquals('/', $url->getDirname());
 
-        $url = Url::create('foo');
+        $url = Url::parse('foo');
         $this->assertEquals('.', $url->getDirname());
 
-        $url = Url::create('foo/');
+        $url = Url::parse('foo/');
         $this->assertEquals('foo', $url->getDirname());
+    }
+
+    public function testToString()
+    {
+        $u = 'http://user:password@host.com:80/foo/bar?asdf=qwer&zui=hjk#asdf';
+        $url = Url::parse($u);
+        $this->assertEquals($u, $url->__toString());
+
+        $u = 'http://user@host/foo/bar?asdf=qwer&zui=hjk#asdf';
+        $url = Url::parse($u);
+        $this->assertEquals($u, $url->__toString());
+
+        $u = 'http://www.test.test';
+        $url = Url::parse($u);
+        $this->assertEquals($u, $url->__toString());
+
+        $u = 'http://www.test.test/index.html';
+        $url = Url::parse($u);
+        $this->assertEquals($u, $url->__toString());
+
+        $u = '../index.php?foo=bar';
+        $url = Url::parse($u);
+        $this->assertEquals($u, $url->__toString());
+
+        $u = '#asdf';
+        $url = Url::parse($u);
+        $this->assertEquals($u, $url->__toString());
     }
 }

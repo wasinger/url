@@ -94,14 +94,21 @@ class Url
      * @return string
      */
     public function __toString() {
-        //TODO: don't ignore user, pass and port
-        return
-            ($this->scheme ? $this->scheme . ':' : '')
-            . ($this->host ? '//' . $this->host : '')
-            . ($this->path ? $this->path : '')
-            . ($this->query ? '?' . $this->query : '')
-            . ($this->fragment ? '#' . $this->fragment : '')
-        ;
+        $url = ($this->scheme ? $this->scheme . ':' : '');
+        if ($this->host || $this->scheme == 'file') $url .= '//';
+        if ($this->host) {
+            if ($this->user) {
+                $url .= $this->user . ($this->pass ? ':' . $this->pass : '') . '@';
+            }
+            $url .= $this->host;
+            if ($this->port) {
+                $url .= ':' . $this->port;
+            }
+        }
+        $url .= ($this->path ? $this->path : '');
+        $url .= ($this->query ? '?' . $this->query : '');
+        $url .= ($this->fragment ? '#' . $this->fragment : '');
+        return $url;
     }
 
     /**
@@ -443,7 +450,7 @@ class Url
      * @param string $url
      * @return Url
      */
-    static public function create($url)
+    static public function parse($url)
     {
         return new static($url);
     }
