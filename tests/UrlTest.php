@@ -37,17 +37,42 @@ class UrlTest extends \PHPUnit_Framework_TestCase {
     {
         $p1 = 'page2.html';
         $p2 = '/pages/index.html';
-
         $this->assertEquals('/pages/page2.html', Url::buildAbsolutePath($p1, $p2));
 
         $p1 = 'page.php';
         $p2 = '/index.html';
-
         $this->assertEquals('/page.php', Url::buildAbsolutePath($p1, $p2));
 
         $p1 = 'a/b';
         $p2 = '/c/d/e';
-
         $this->assertEquals('/c/d/a/b', Url::buildAbsolutePath($p1, $p2));
+
+        $p1 = '../images/1.gif';
+        $p2 = '/pages/index.html';
+        $this->assertEquals('/images/1.gif', Url::buildAbsolutePath($p1, $p2));
+
+        $p1 = '../images/1.gif';
+        $p2 = '/pages/';
+        $this->assertEquals('/images/1.gif', Url::buildAbsolutePath($p1, $p2));
+
+        $p1 = 'images/1.gif';
+        $p2 = '/index.html';
+        $this->assertEquals('/images/1.gif', Url::buildAbsolutePath($p1, $p2));
+
+        $p1 = 'images/1.gif';
+        $p2 = '/';
+        $this->assertEquals('/images/1.gif', Url::buildAbsolutePath($p1, $p2));
+    }
+
+    /**
+     * @covers \Wa72\Url\Url::normalizePath()
+     */
+    public function testNormalizePath()
+    {
+        $this->assertEquals('foo/bar', Url::normalizePath('./foo/bar'));
+        $this->assertEquals('foo/bar', Url::normalizePath('foo/./bar'));
+        $this->assertEquals('foo/bar', Url::normalizePath('foo/foo/../bar'));
+        $this->assertEquals('foo/bar', Url::normalizePath('foo/asdf/qwer/../../bar'));
+        $this->assertEquals('../bar', Url::normalizePath('../bar'));
     }
 }

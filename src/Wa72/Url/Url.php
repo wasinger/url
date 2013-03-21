@@ -392,9 +392,26 @@ class Url
      * @return string
      */
     static public function buildAbsolutePath($relative_path, $basepath) {
-        $basedir = dirname($basepath);
+        if (substr($basepath, -1) == '/') $basedir = substr($basepath, 0, -1);
+        else $basedir = dirname($basepath);
         if ($basedir == '.' || $basedir == '/' || $basedir == '\\') $basedir = '';
-        return $basedir . '/' . $relative_path;
+        return self::normalizePath($basedir . '/' . $relative_path);
+    }
+
+    /**
+     * @param string $path
+     * @return string
+     */
+    static public function normalizePath($path)
+    {
+        $path = preg_replace('|/\./|', '/', $path);   // entferne /./
+        $path = preg_replace('|^\./|', '', $path);    // entferne ./ am Anfang
+        $i = 0;
+        while (preg_match('|[^/]+/\.{2}/|', $path) && $i < 10) {
+            $path = preg_replace('|([^/]+)(/\.{2}/)|e', "'\\1'=='..'?'\\0':''", $path);
+            $i++;
+        }
+        return $path;
     }
 
     /**
