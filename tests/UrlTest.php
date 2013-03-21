@@ -75,4 +75,45 @@ class UrlTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('foo/bar', Url::normalizePath('foo/asdf/qwer/../../bar'));
         $this->assertEquals('../bar', Url::normalizePath('../bar'));
     }
+
+    /**
+     * @covers \Wa72\Url\Url::getFilename()
+     */
+    public function testGetFilename()
+    {
+        $url = Url::create('/asdf/index.html');
+        $this->assertEquals('index.html', $url->getFilename());
+
+        $url = Url::create('/asdf/');
+        $this->assertEquals('', $url->getFilename());
+
+        $url = Url::create('/foo');
+        $this->assertEquals('foo', $url->getFilename());
+
+        $url = Url::create('foo');
+        $this->assertEquals('foo', $url->getFilename());
+
+        $url = Url::create('foo/');
+        $this->assertEquals('', $url->getFilename());
+    }
+    /**
+     * @covers \Wa72\Url\Url::getDirname()
+     */
+    public function testGetDirname()
+    {
+        $url = Url::create('/asdf/index.html');
+        $this->assertEquals('/asdf', $url->getDirname());
+
+        $url = Url::create('/asdf/');
+        $this->assertEquals('/asdf', $url->getDirname());
+
+        $url = Url::create('/foo');
+        $this->assertEquals('/', $url->getDirname());
+
+        $url = Url::create('foo');
+        $this->assertEquals('.', $url->getDirname());
+
+        $url = Url::create('foo/');
+        $this->assertEquals('foo', $url->getDirname());
+    }
 }

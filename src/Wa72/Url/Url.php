@@ -256,7 +256,17 @@ class Url
      */
     public function getFilename()
     {
-        return basename($this->path);
+        return static::filename($this->path);
+    }
+
+    /**
+     * Get the directory name from the path
+     *
+     * @return string
+     */
+    public function getDirname()
+    {
+        return static::dirname($this->path);
     }
 
     /**
@@ -327,7 +337,7 @@ class Url
             $this->user = $baseurl->getUser();
             $this->pass = $baseurl->getPass();
             $this->port = $baseurl->getPort();
-            $this->path = self::buildAbsolutePath($this->path, $baseurl->getPath());
+            $this->path = static::buildAbsolutePath($this->path, $baseurl->getPath());
         }
         return $this;
     }
@@ -392,10 +402,9 @@ class Url
      * @return string
      */
     static public function buildAbsolutePath($relative_path, $basepath) {
-        if (substr($basepath, -1) == '/') $basedir = substr($basepath, 0, -1);
-        else $basedir = dirname($basepath);
+        $basedir = static::dirname($basepath);
         if ($basedir == '.' || $basedir == '/' || $basedir == '\\') $basedir = '';
-        return self::normalizePath($basedir . '/' . $relative_path);
+        return static::normalizePath($basedir . '/' . $relative_path);
     }
 
     /**
@@ -412,6 +421,22 @@ class Url
             $i++;
         }
         return $path;
+    }
+
+    /**
+     * @param $path
+     * @return string
+     */
+    static public function filename($path)
+    {
+        if (substr($path, -1) == '/') return '';
+        else return basename($path);
+    }
+
+    static public function dirname($path)
+    {
+        if (substr($path, -1) == '/') return substr($path, 0, -1);
+        else return dirname($path);
     }
 
     /**
