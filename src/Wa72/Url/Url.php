@@ -3,6 +3,8 @@ namespace Wa72\Url;
 
 class Url
 {
+    const PATH_SEGMENT_SEPARATOR = '/';
+
     protected $original_url;
 
     protected $scheme;
@@ -32,7 +34,7 @@ class Url
         if (isset($urlo['pass'])) $this->pass = $urlo['pass'];
         if (isset($urlo['host'])) $this->host = strtolower($urlo['host']);
         if (isset($urlo['port'])) $this->port = intval($urlo['port']);
-        if (isset($urlo['path'])) $this->path = $urlo['path'];
+        if (isset($urlo['path'])) $this->path = static::normalizePath($urlo['path']);
         if (isset($urlo['query'])) $this->query = $urlo['query'];
         if ($this->query != '') parse_str($this->query, $this->query_array);
         if (isset($urlo['fragment'])) $this->fragment = $urlo['fragment'];
@@ -171,7 +173,7 @@ class Url
      */
     public function setPath($path)
     {
-        $this->path = $path;
+        $this->path = static::normalizePath($path);
         return $this;
     }
 
@@ -276,6 +278,14 @@ class Url
         return static::dirname($this->path);
     }
 
+    public function appendPathSegment($segment)
+    {
+        if (substr($this->path, -1) != static::PATH_SEGMENT_SEPARATOR) $this->path .= static::PATH_SEGMENT_SEPARATOR;
+        if (substr($segment, 0, 1) == static::PATH_SEGMENT_SEPARATOR) $segment = substr($segment, 1);
+        $this->path .= $segment;
+        return $this;
+    }
+
     /**
      * @param string $name
      * @return bool
@@ -373,8 +383,7 @@ class Url
      */
     public function equalsPath($another_path)
     {
-        // TODO: normalize paths
-        return $this->getPath() == $another_path;
+        return $this->getPath() == static::normalizePath($another_path);
     }
 
     /**

@@ -117,6 +117,26 @@ class UrlTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('foo', $url->getDirname());
     }
 
+    public function testAppendPathSegment()
+    {
+        $url = Url::parse('foo');
+        $url->appendPathSegment('bar');
+        $this->assertEquals('foo/bar', $url->__toString());
+
+        $url = Url::parse('foo/');
+        $url->appendPathSegment('/bar');
+        $this->assertEquals('foo/bar', $url->__toString());
+
+        $url = Url::parse('/foo');
+        $url->appendPathSegment('/bar');
+        $this->assertEquals('/foo/bar', $url->__toString());
+
+        $url = Url::parse('http://www.test.test');
+        $url->appendPathSegment('index.php');
+        $this->assertEquals('http://www.test.test/index.php', $url->__toString());
+
+    }
+
     public function testToString()
     {
         $u = 'http://user:password@host.com:80/foo/bar?asdf=qwer&zui=hjk#asdf';
