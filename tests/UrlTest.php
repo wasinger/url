@@ -14,6 +14,12 @@ class UrlTest extends \PHPUnit_Framework_TestCase {
         $url2 = new Url('index.php?b=5&a=3');
         $this->assertTrue($url1->equalsQuery($url2));
 
+        // Queries are considered to be equal if they parse to the same array in PHP!!!
+        // If a key is given more than once with different values, the last one wins.
+        $url1 = Url::parse('index.php?a=1&a=3&b=5');
+        $url2 = new Url('index.php?b=2&b=5&a=3');
+        $this->assertTrue($url1->equalsQuery($url2));
+
         $url1 = new Url('index.php?a=3&b=5&c=asdf');
         $url2 = Url::parse('index.php?b=5&a=3');
         $this->assertFalse($url1->equalsQuery($url2));
