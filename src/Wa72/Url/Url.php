@@ -387,6 +387,20 @@ class Url
     }
 
     /**
+     * Check whether the path is within another path
+     *
+     * @param string $another_path
+     * @return bool True if $this->path is a subpath of $another_path
+     */
+    public function isInPath($another_path)
+    {
+        $p = static::normalizePath($another_path);
+        if ($p == $this->path) return true;
+        if (substr($p, -1) != self::PATH_SEGMENT_SEPARATOR) $p .= self::PATH_SEGMENT_SEPARATOR;
+        return (strlen($this->path) > $p && substr($this->path, 0, strlen($p)) == $p);
+    }
+
+    /**
      * @param string|array|Url $another_query
      * @return bool
      */
@@ -419,8 +433,8 @@ class Url
      */
     static public function buildAbsolutePath($relative_path, $basepath) {
         $basedir = static::dirname($basepath);
-        if ($basedir == '.' || $basedir == '/' || $basedir == '\\') $basedir = '';
-        return static::normalizePath($basedir . '/' . $relative_path);
+        if ($basedir == '.' || $basedir == '/' || $basedir == '\\' || $basedir == DIRECTORY_SEPARATOR) $basedir = '';
+        return static::normalizePath($basedir . self::PATH_SEGMENT_SEPARATOR . $relative_path);
     }
 
     /**
@@ -445,14 +459,18 @@ class Url
      */
     static public function filename($path)
     {
-        if (substr($path, -1) == '/') return '';
+        if (substr($path, -1) == self::PATH_SEGMENT_SEPARATOR) return '';
         else return basename($path);
     }
 
     static public function dirname($path)
     {
-        if (substr($path, -1) == '/') return substr($path, 0, -1);
-        else return dirname($path);
+        if (substr($path, -1) == self::PATH_SEGMENT_SEPARATOR) return substr($path, 0, -1);
+        else {
+            $d = dirname($path);
+            if ($d == DIRECTORY_SEPARATOR) $d = self::PATH_SEGMENT_SEPARATOR;
+            return $d;
+        }
     }
 
     /**

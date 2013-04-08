@@ -116,7 +116,9 @@ class UrlTest extends \PHPUnit_Framework_TestCase {
         $url = Url::parse('foo/');
         $this->assertEquals('foo', $url->getDirname());
     }
-
+    /**
+     * @covers \Wa72\Url\Url::appendPathSegment()
+     */
     public function testAppendPathSegment()
     {
         $url = Url::parse('foo');
@@ -163,4 +165,25 @@ class UrlTest extends \PHPUnit_Framework_TestCase {
         $url = Url::parse($u);
         $this->assertEquals($u, $url->__toString());
     }
+
+    /**
+     * @covers \Wa72\Url\Url::isInPath()
+     */
+    public function testIsInPath()
+    {
+        $url = Url::parse('/foo/bar.html');
+        $this->assertTrue($url->isInPath('/foo/'));
+        $this->assertTrue($url->isInPath('/foo'));
+        $this->assertFalse($url->isInPath('/foo/bar'));
+
+        $url = Url::parse('/de');
+        $this->assertTrue($url->isInPath('/de'));
+        $this->assertFalse($url->isInPath('/de/'));
+
+        $url = Url::parse('/de/');
+        $this->assertTrue($url->isInPath('/de'));
+        $this->assertTrue($url->isInPath('/de/'));
+
+    }
 }
+
