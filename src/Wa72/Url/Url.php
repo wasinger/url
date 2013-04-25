@@ -4,6 +4,9 @@ namespace Wa72\Url;
 class Url
 {
     const PATH_SEGMENT_SEPARATOR = '/';
+    const WRITE_FLAG_AS_IS = 0;
+    const WRITE_FLAG_OMIT_SCHEME = 1;
+    const WRITE_FLAG_OMIT_HOST = 2;
 
     protected $original_url;
 
@@ -123,9 +126,29 @@ class Url
      * @return string
      */
     public function __toString() {
-        $url = ($this->scheme ? $this->scheme . ':' : '');
-        if ($this->host || $this->scheme == 'file') $url .= '//';
-        if ($this->host) {
+        return $this->write();
+    }
+
+    /**
+     * Write out the url
+     *
+     * <p>With the $write_flags parameter one can force to output protocol-relative and
+     * host-relative URLs from absolute URLs (a relative URl is always output as-is)</p>
+     * <ul>
+     *   <li>write(Url::WRITE_FLAG_OMIT_SCHEME) returns protocol-relative url</li>
+     *   <li>write(Url::WRITE_FLAG_OMIT_SCHEME | Url::WRITE_FLAG_OMIT_HOST) returns host-relative url</li>
+     * </ul>
+     *
+     * @param int $write_flags A combination of the WRITE_FLAG_* constants
+     * @return string
+     */
+    public function write($write_flags = self::WRITE_FLAG_AS_IS)
+    {
+        $show_scheme = $this->scheme && (!($write_flags & self::WRITE_FLAG_OMIT_SCHEME));
+        $show_host = $this->host && (!($write_flags & self::WRITE_FLAG_OMIT_HOST));
+        $url = ($show_scheme ? $this->scheme . ':' : '');
+        if ($show_host || $this->scheme == 'file') $url .= '//';
+        if ($show_host) {
             if ($this->user) {
                 $url .= $this->user . ($this->pass ? ':' . $this->pass : '') . '@';
             }

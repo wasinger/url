@@ -144,32 +144,38 @@ class UrlTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('http://www.test.test/index.php', $url->__toString());
 
     }
-
-    public function testToString()
+    /**
+     * @covers \Wa72\Url\Url::write()
+     */
+    public function testWrite()
     {
         $u = 'http://user:password@host.com:80/foo/bar?asdf=qwer&zui=hjk#asdf';
         $url = Url::parse($u);
-        $this->assertEquals($u, $url->__toString());
+        $this->assertEquals($u, $url->write());
 
         $u = 'http://user@host/foo/bar?asdf=qwer&zui=hjk#asdf';
         $url = Url::parse($u);
-        $this->assertEquals($u, $url->__toString());
+        $this->assertEquals($u, $url->write());
+        $this->assertEquals('//user@host/foo/bar?asdf=qwer&zui=hjk#asdf',
+            $url->write(Url::WRITE_FLAG_OMIT_SCHEME));
+        $this->assertEquals('/foo/bar?asdf=qwer&zui=hjk#asdf',
+            $url->write(Url::WRITE_FLAG_OMIT_SCHEME | Url::WRITE_FLAG_OMIT_HOST));
 
         $u = 'http://www.test.test';
         $url = Url::parse($u);
-        $this->assertEquals($u, $url->__toString());
+        $this->assertEquals($u, $url->write());
 
         $u = 'http://www.test.test/index.html';
         $url = Url::parse($u);
-        $this->assertEquals($u, $url->__toString());
+        $this->assertEquals($u, $url->write());
 
         $u = '../index.php?foo=bar';
         $url = Url::parse($u);
-        $this->assertEquals($u, $url->__toString());
+        $this->assertEquals($u, $url->write());
 
         $u = '#asdf';
         $url = Url::parse($u);
-        $this->assertEquals($u, $url->__toString());
+        $this->assertEquals($u, $url->write());
     }
 
     /**
