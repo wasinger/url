@@ -41,15 +41,41 @@ class Url
     }
 
     /**
-     * Checks whether this URL is a WWW resource (as opposed to e.g. mailto: and tel: urls)
+     * Check whether we have a URL in the narrower meaning as link to a document
+     * with a path that has file system semantics
+     * (as opposed to e.g. mailto:, javascript: and tel: URIs)
+     *
+     * <p>This function simply checks whether the scheme is http(s), ftp(s), file or empty.
+     * (Since we are dealing with URLs in HTML pages we assume that if no scheme
+     * is provided it is a relative HTTP-URL).</p>
+     *
+     * <p>This function is useful to filter out mailto: and other links
+     * after finding all hrefs in a page and before calling
+     * path manipulation functions like makeAbsolute() that make no sense on mailto-URIs:</p>
+     * <code>
+     *  $c = new \Symfony\Component\DomCrawler\Crawler($htmlcode, $pageurl);
+     *  $links = $c->filter('a');
+     *  foreach ($links as $elem) {
+     *      $url = Url::parse($elem->getAttribute('href');
+     *      if ($url->is_url()) {
+     *          echo (string) $url->makeAbsolute($pageurl); // convert relative links to absolute
+     *      } else {
+     *          echo (string) $url; // leave mailto:-links untouched
+     *      }
+     *  }
+     * </code>
      *
      * @return bool
      */
-    public function is_www()
+    public function is_url()
     {
-        // since we are dealing with URLs in HTML pages
-        // we assume that if no scheme is provided it is http or https
-        return ($this->scheme == 'http' || $this->scheme == 'https' || $this->scheme == '');
+        return ($this->scheme == ''
+            || $this->scheme == 'http'
+            || $this->scheme == 'https'
+            || $this->scheme == 'ftp'
+            || $this->scheme == 'ftps'
+            || $this->scheme == 'file'
+        );
     }
 
     /**
@@ -59,6 +85,7 @@ class Url
     {
         return (substr($this->original_url, 0, 1) == '#');
     }
+
 
     /**
      * @return bool
@@ -348,7 +375,7 @@ class Url
      */
     public function makeAbsolute($baseurl = null) {
         if (is_string($baseurl)) $baseurl = new static($baseurl);
-        if ($this->is_www() && $this->is_relative() && $baseurl instanceof Url) {
+        if ($this->is_url() && $this->is_relative() && $baseurl instanceof Url) {
             $this->host = $baseurl->getHost();
             $this->scheme = $baseurl->getScheme();
             $this->user = $baseurl->getUser();
