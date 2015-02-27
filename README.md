@@ -1,7 +1,7 @@
 url
 ===
 
-PHP class for handling and manipulating URLs.
+PHP class for handling and manipulating URLs. It's a pragmatic one-class lib that is completely framework independent.
 
 [![Build Status](https://secure.travis-ci.org/wasinger/url.png?branch=master)](http://travis-ci.org/wasinger/url)
 
@@ -12,11 +12,16 @@ PHP class for handling and manipulating URLs.
 - supports protocol-relative urls
 - convert absolute, host-relative and protocol-relative urls to relative and vice versa
 
+Installation
+------------
+```
+composer require "wa72/url": "dev-master"
+```
 
 Features and Usage
 ------------------
 
-*** Parse a URL to an object ***
+### Parse a URL to an object ###
 
 ```php
 use \Wa72\Url;
@@ -34,7 +39,7 @@ echo $url->write();
 echo $url;
 ```
 
-*** Easily modify and add query parameters ***
+### Easily modify and add query parameters ###
 
 ```php
 $url->setQueryParameter('p1', 'newvalue');
@@ -50,7 +55,7 @@ echo $url;
 // http://another-server.org/index.php?p1=newvalue&p2=bar&param3[]=5&param3[]=6
 ```
 
-*** Compare URLs with query strings the PHP way ***
+### Compare URLs with query strings the PHP way ###
 
 While in general a URL may have multiple query parameters with the same name 
 (e.g. `?a=value1&a=value2&a=value3`) and there are web applications that convert
@@ -73,7 +78,7 @@ return $url1.equals($url2);
 // will return TRUE
 ```
 
-*** More documentation to come ***
+### More documentation to come ###
 
 Meanwhile, have a look at the source code, there are lots of comments in it.
 
