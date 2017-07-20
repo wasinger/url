@@ -497,7 +497,9 @@ class Url
         $path = preg_replace('|^\./|', '', $path);    // entferne ./ am Anfang
         $i = 0;
         while (preg_match('|[^/]+/\.{2}/|', $path) && $i < 10) {
-            $path = preg_replace('|([^/]+)(/\.{2}/)|e', "'\\1'=='..'?'\\0':''", $path);
+            $path = preg_replace_callback('|([^/]+)(/\.{2}/)|', function($matches){
+                return ($matches[1] == '..' ? $matches[0] : '');
+            }, $path);
             $i++;
         }
         return $path;
