@@ -78,6 +78,58 @@ return $url1.equals($url2);
 // will return TRUE
 ```
 
+### Make relative URL absolute ###
+
+A given URL that has 
+
+- no scheme (protocol-relative URL)
+- no scheme and no host (host-relative URL)
+- no scheme, no host, and a relative path (relative URL)
+
+can be turned into an absolute URL by a given base URL:
+
+```php
+$url = Url::parse('page.php');
+$baseurl = Url::parse('http://www.test.test/index.html');
+$url->makeAbsolute($baseurl);
+echo $url; // will print: http://www.test.test/page.php
+
+$url = Url::parse('../de/seite.html');
+$baseurl = Url::parse('http://www.test.test/en/page.html');
+$url->makeAbsolute($baseurl);
+echo $url; // will print: http://www.test.test/de/seite.html
+
+$url = Url::parse('/index.html');
+$baseurl = Url::parse('http://www.test.test/en/page.html');
+$url->makeAbsolute($baseurl);
+echo $url; // will print: http://www.test.test/index.html
+
+$url = Url::parse('/index.html');
+$baseurl = Url::parse('http://www.test.test/en/page.html');
+$url->makeAbsolute($baseurl);
+echo $url; // will print: http://www.test.test/index.html
+
+$url = Url::parse('//www.test.test/index.html');
+$baseurl = Url::parse('https://www.test.test/en/page.html');
+$url->makeAbsolute($baseurl);
+echo $url; // will print: https://www.test.test/index.html
+```
+
+### Output protocol-relative and host-relative URLs ###
+
+If you want to omit the scheme, or scheme and host, when outputting the URL 
+you can pass `Url::WRITE_FLAG_OMIT_SCHEME` and with `Url::WRITE_FLAG_OMIT_HOST` to the `write()`-method:
+
+```php
+$url = Url::parse('https://www.test.test/index.php?id=5#c1');
+
+// protocol-relative output
+echo $url->write(Url::WRITE_FLAG_OMIT_SCHEME); // will print: //www.test.test/index.php?id=5#c1
+
+// host-relative output
+echo $url->write(Url::WRITE_FLAG_OMIT_SCHEME | Url::WRITE_FLAG_OMIT_HOST)); // will print: /index.php?id=5#c1
+```
+
 ### More documentation to come ###
 
 Meanwhile, have a look at the source code, there are lots of comments in it.
