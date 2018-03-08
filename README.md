@@ -3,7 +3,9 @@ url
 
 PHP class for handling and manipulating URLs. It's a pragmatic one-class lib that is completely framework independent.
 
-[![Build Status](https://secure.travis-ci.org/wasinger/url.png?branch=master)](http://travis-ci.org/wasinger/url)
+[![Build Status](https://secure.travis-ci.org/wasinger/url.svg?branch=master)](http://travis-ci.org/wasinger/url)
+[![Latest Version](http://img.shields.io/packagist/v/wa72/url.svg)](https://packagist.org/packages/wa72/url)
+
 
 - Parse URL strings to objects
 - add and modify query parameters
@@ -14,6 +16,9 @@ PHP class for handling and manipulating URLs. It's a pragmatic one-class lib tha
 
 Installation
 ------------
+
+This package is listed on [Packagist](https://packagist.org/packages/wa72/url).
+
 ```
 composer require wa72/url
 ```
@@ -134,4 +139,4 @@ echo $url->write(Url::WRITE_FLAG_OMIT_SCHEME | Url::WRITE_FLAG_OMIT_HOST)); // w
 
 Meanwhile, have a look at the source code, there are lots of comments in it.
 
-(c) Christoph Singer 2015. Licensed under the MIT license.
+(c) Christoph Singer 2018. Licensed under the MIT license.
