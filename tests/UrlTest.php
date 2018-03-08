@@ -34,6 +34,12 @@ class UrlTest extends \PHPUnit_Framework_TestCase {
         $url2 = Url::parse('http://www.test.test/index.html');
 
         $this->assertEquals('http://www.test.test/page.php?a=3&b=5', (string) $url1->makeAbsolute($url2));
+
+        $url1 = new Url('/bar.html');
+        $this->assertEquals('http://www.test.test/bar.html', (string) $url1->makeAbsolute($url2));
+
+        $url1 = new Url('//xy.bar.com/index.html');
+        $this->assertEquals('http://xy.bar.com/index.html', (string) $url1->makeAbsolute($url2));
     }
 
     /**
@@ -68,6 +74,10 @@ class UrlTest extends \PHPUnit_Framework_TestCase {
         $p1 = 'images/1.gif';
         $p2 = '/';
         $this->assertEquals('/images/1.gif', Url::buildAbsolutePath($p1, $p2));
+
+        $p1 = '/a/b';
+        $p2 = '/c/d/e';
+        $this->assertEquals('/a/b', Url::buildAbsolutePath($p1, $p2));
     }
 
     /**

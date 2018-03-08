@@ -389,17 +389,18 @@ class Url
     }
 
     /**
-     * Make this (relative) URL absolute using another absolute base URL
+     * Make this (path-relative, host-relative or scheme-relative) URL absolute using another absolute base URL
      *
-     * Does nothing if this URL is not relative
+     * Does nothing if this URL is not relative (path-relative, host-relative or scheme-relative)
      *
      * @param Url|string|null $baseurl
      * @return Url $this
      */
     public function makeAbsolute($baseurl = null) {
-        if (is_string($baseurl)) $baseurl = new static($baseurl);
-        if ($this->is_url() && $this->is_relative() && $baseurl instanceof Url) {
-            $this->host = $baseurl->getHost();
+        if (!$baseurl) return $this;
+        if (!$baseurl instanceof Url) $baseurl = new static($baseurl);
+        if ($this->is_url() && ($this->is_relative() || $this->is_host_relative() || $this->is_protocol_relative()) && $baseurl instanceof Url) {
+            if (!$this->host) $this->host = $baseurl->getHost();
             $this->scheme = $baseurl->getScheme();
             $this->user = $baseurl->getUser();
             $this->pass = $baseurl->getPass();
@@ -482,8 +483,12 @@ class Url
      * @return string
      */
     static public function buildAbsolutePath($relative_path, $basepath) {
+        if (strpos($relative_path, static::PATH_SEGMENT_SEPARATOR) === 0) {
+            // this is already an absolute path!
+            return static::normalizePath($relative_path);
+        }
         $basedir = static::dirname($basepath);
-        if ($basedir == '.' || $basedir == '/' || $basedir == '\\' || $basedir == DIRECTORY_SEPARATOR) $basedir = '';
+        if ($basedir == '.' || $basedir == static::PATH_SEGMENT_SEPARATOR || $basedir == '\\' || $basedir == DIRECTORY_SEPARATOR) $basedir = '';
         return static::normalizePath($basedir . self::PATH_SEGMENT_SEPARATOR . $relative_path);
     }
 
