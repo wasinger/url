@@ -15,7 +15,7 @@ PHP class for handling and manipulating URLs. It's a pragmatic one-class lib tha
 Installation
 ------------
 ```
-composer require "wa72/url": "dev-master"
+composer require wa72/url
 ```
 
 Features and Usage
