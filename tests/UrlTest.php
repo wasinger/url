@@ -3,7 +3,7 @@ namespace Wa72\Url\Tests;
 
 use Wa72\Url\Url;
 
-class UrlTest extends \PHPUnit_Framework_TestCase {
+class UrlTest extends \PHPUnit\Framework\TestCase {
 
     /**
      * @covers \Wa72\Url\Url::equalsQuery()
