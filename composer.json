@@ -12,8 +12,13 @@
         }
     ],
     "autoload":{
-        "psr-0":{
-            "Wa72\\Url":"src/"
+        "psr-4":{
+            "Wa72\\Url\\": "src/Wa72/Url"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Wa72\\Url\\Tests\\": "tests"
         }
     },
     "require": {
