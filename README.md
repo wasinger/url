@@ -14,6 +14,8 @@ PHP class for handling and manipulating URLs. It's a pragmatic one-class lib tha
 - supports protocol-relative urls
 - convert absolute, host-relative and protocol-relative urls to relative and vice versa
 
+- New in version 0.7 (2018/07/25): optional compatibility with  `Psr\Http\Message\UriInterface` (PSR-7), see below
+
 Installation
 ------------
 
@@ -133,6 +135,41 @@ echo $url->write(Url::WRITE_FLAG_OMIT_SCHEME); // will print: //www.test.test/in
 
 // host-relative output
 echo $url->write(Url::WRITE_FLAG_OMIT_SCHEME | Url::WRITE_FLAG_OMIT_HOST)); // will print: /index.php?id=5#c1
+```
+
+### Compatibility with `Psr\Http\Message\UriInterface` (PSR-7) ###
+
+
+- class `Url` now has all methods defined in this interface but does not officially implement it.
+- new wrapper class `Psr7Uri` that implements `UriInterface`
+- methods for converting between `Url` and `Psr7Uri`
+
+Class `Url` does not implement the PSR Interface by itself for two reasons:
+1. To not introduce a new dependency on the PSR interface. The dependency is only "suggested" in composer json.
+2. Because the PSR interface is designed to be immutable,
+    while `Url` is not.
+
+To use this feature, you need to `composer require psr/http-message`
+
+```php
+<?php
+use Wa72\Url\Psr7Uri;
+use Wa72\Url\Url;
+
+# Get a Psr7Uri from a Url object
+
+$url = Url::parse('https://www.foo.bar/test.php?a=b');
+$psr7uri = Psr7Uri::fromUrl($url);
+// or alternatively:
+$psr7uri = $url->toPsr7();
+
+# Get a Url object from UriInterface
+
+$url = Url::fromPsr7($psr7uri);
+// or alternatively:
+$url = $psr7uri->toUrl();
+
+
 ```
 
 ### More documentation to come ###
