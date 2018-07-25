@@ -539,7 +539,18 @@ class UrlTest extends TestCase {
      */
     public function testWrite()
     {
-        $u = 'http://user:password@host.com:80/foo/bar?asdf=qwer&zui=hjk#asdf';
+        $u = 'http://user:password@host.com/foo/bar?asdf=qwer&zui=hjk#asdf';
+        $url = Url::parse($u);
+        $this->assertEquals($u, $url->write());
+
+        // Test: omit standard port
+        $u1 = 'http://user:password@host.com:80/foo/bar?asdf=qwer&zui=hjk#asdf';
+        $u2 = 'http://user:password@host.com/foo/bar?asdf=qwer&zui=hjk#asdf';
+        $url = Url::parse($u1);
+        $this->assertEquals($u2, $url->write());
+
+        // Test: non-standard port
+        $u = 'http://user:password@host.com:81/foo/bar?asdf=qwer&zui=hjk#asdf';
         $url = Url::parse($u);
         $this->assertEquals($u, $url->write());
 

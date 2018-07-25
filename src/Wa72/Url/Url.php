@@ -1,6 +1,8 @@
 <?php
 namespace Wa72\Url;
 
+use Psr\Http\Message\UriInterface;
+
 class Url
 {
     const PATH_SEGMENT_SEPARATOR = '/';
@@ -145,17 +147,11 @@ class Url
     public function write($write_flags = self::WRITE_FLAG_AS_IS)
     {
         $show_scheme = $this->scheme && (!($write_flags & self::WRITE_FLAG_OMIT_SCHEME));
-        $show_host = $this->host && (!($write_flags & self::WRITE_FLAG_OMIT_HOST));
+        $show_authority = $this->host && (!($write_flags & self::WRITE_FLAG_OMIT_HOST));
         $url = ($show_scheme ? $this->scheme . ':' : '');
-        if ($show_host || $this->scheme == 'file') $url .= '//';
-        if ($show_host) {
-            if ($this->user) {
-                $url .= $this->user . ($this->pass ? ':' . $this->pass : '') . '@';
-            }
-            $url .= $this->host;
-            if ($this->port) {
-                $url .= ':' . $this->port;
-            }
+        if ($show_authority || $this->scheme == 'file') $url .= '//';
+        if ($show_authority) {
+            $url .= $this->getAuthority();
         }
         $url .= ($this->path ? $this->path : '');
         $url .= ($this->query ? '?' . $this->query : '');
@@ -236,19 +232,46 @@ class Url
     }
 
     /**
-     * @param int $port
+     * @param int|null $port
      */
     public function setPort($port)
     {
-        $this->port = intval($port);
+        if ($port) {
+            $this->port = intval($port);
+        } else {
+            $this->port = null;
+        }
     }
 
     /**
-     * @return int
+     * Retrieve the port component of the URI.
+     *
+     * If a port is present, and it is non-standard for the current scheme,
+     * this method MUST return it as an integer. If the port is the standard port
+     * used with the current scheme, this method SHOULD return null.
+     *
+     * If no port is present, and no scheme is present, this method MUST return
+     * a null value.
+     *
+     * If no port is present, but a scheme is present, this method MAY return
+     * the standard port for that scheme, but SHOULD return null.
+     *
+     * @return null|int The URI port.
      */
     public function getPort()
     {
-        return $this->port;
+        $port = $this->port;
+        $default_ports = [
+            'http' => 80,
+            'https' => 443,
+            'ftp' => 21
+        ];
+        foreach ($default_ports as $scheme => $dp) {
+            if ($this->scheme == $scheme && $port == $dp) {
+                $port = null;
+            }
+        }
+        return $port;
     }
 
     /**
@@ -473,6 +496,232 @@ class Url
     {
         // TODO: normalize IDN
         return $this->getHost() == strtolower($another_hostname);
+    }
+
+    /**
+     * Compatibility with Psr\Http\Message\UriInterface
+     *
+     * Retrieve the user information component of the URI.
+     *
+     * If no user information is present, this method MUST return an empty
+     * string.
+     *
+     * If a user is present in the URI, this will return that value;
+     * additionally, if the password is also present, it will be appended to the
+     * user value, with a colon (":") separating the values.
+     *
+     * The trailing "@" character is not part of the user information and MUST
+     * NOT be added.
+     *
+     * @return string The URI user information, in "username[:password]" format.
+     */
+    public function getUserInfo()
+    {
+        if ($this->user) {
+            return $this->user . ($this->pass ? ':' . $this->pass : '');
+        }
+        return '';
+    }
+    /**
+     * Compatibility with Psr\Http\Message\UriInterface
+     *
+     * Retrieve the authority component of the URI.
+     *
+     * If no authority information is present, this method MUST return an empty
+     * string.
+     *
+     * The authority syntax of the URI is:
+     *
+     * <pre>
+     * [user-info@]host[:port]
+     * </pre>
+     *
+     * If the port component is not set or is the standard port for the current
+     * scheme, it SHOULD NOT be included.
+     *
+     * @see https://tools.ietf.org/html/rfc3986#section-3.2
+     * @return string The URI authority, in "[user-info@]host[:port]" format.
+     */
+    public function getAuthority()
+    {
+        $userinfo = $this->getUserInfo();
+        $port = $this->getPort();
+        return ($userinfo ? $userinfo . '@' : '') . $this->host . ($port ? ':' . $port : '');
+    }
+
+    /**
+     * Return an instance with the specified scheme.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the specified scheme.
+     *
+     * Implementations MUST support the schemes "http" and "https" case
+     * insensitively, and MAY accommodate other schemes if required.
+     *
+     * An empty scheme is equivalent to removing the scheme.
+     *
+     * @param string $scheme The scheme to use with the new instance.
+     * @return static A new instance with the specified scheme.
+     * @throws \InvalidArgumentException for invalid or unsupported schemes.
+     */
+    public function withScheme($scheme)
+    {
+        $new_uri = clone $this;
+        $new_uri->setScheme($scheme);
+        return $new_uri;
+    }
+
+    /**
+     * Return an instance with the specified user information.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the specified user information.
+     *
+     * Password is optional, but the user information MUST include the
+     * user; an empty string for the user is equivalent to removing user
+     * information.
+     *
+     * @param string $user The user name to use for authority.
+     * @param null|string $password The password associated with $user.
+     * @return static A new instance with the specified user information.
+     */
+    public function withUserInfo($user, $password = null)
+    {
+        $new_uri = clone $this;
+        $new_uri->setUser($user);
+        $new_uri->setPass($password);
+        return $new_uri;
+    }
+
+    /**
+     * Return an instance with the specified host.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the specified host.
+     *
+     * An empty host value is equivalent to removing the host.
+     *
+     * @param string $host The hostname to use with the new instance.
+     * @return static A new instance with the specified host.
+     * @throws \InvalidArgumentException for invalid hostnames.
+     */
+    public function withHost($host)
+    {
+        $new_uri = clone $this;
+        $new_uri->setHost($host);
+        return $new_uri;
+    }
+
+    /**
+     * Return an instance with the specified port.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the specified port.
+     *
+     * Implementations MUST raise an exception for ports outside the
+     * established TCP and UDP port ranges.
+     *
+     * A null value provided for the port is equivalent to removing the port
+     * information.
+     *
+     * @param null|int $port The port to use with the new instance; a null value
+     *     removes the port information.
+     * @return static A new instance with the specified port.
+     * @throws \InvalidArgumentException for invalid ports.
+     */
+    public function withPort($port)
+    {
+        $new_uri = clone $this;
+        $new_uri->setPort($port);
+        return $new_uri;
+    }
+
+    /**
+     * Return an instance with the specified path.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the specified path.
+     *
+     * The path can either be empty or absolute (starting with a slash) or
+     * rootless (not starting with a slash). Implementations MUST support all
+     * three syntaxes.
+     *
+     * If the path is intended to be domain-relative rather than path relative then
+     * it must begin with a slash ("/"). Paths not starting with a slash ("/")
+     * are assumed to be relative to some base path known to the application or
+     * consumer.
+     *
+     * Users can provide both encoded and decoded path characters.
+     * Implementations ensure the correct encoding as outlined in getPath().
+     *
+     * @param string $path The path to use with the new instance.
+     * @return static A new instance with the specified path.
+     * @throws \InvalidArgumentException for invalid paths.
+     */
+    public function withPath($path)
+    {
+        $new_uri = clone $this;
+        $new_uri->setPath($path);
+        return $new_uri;
+    }
+
+    /**
+     * Return an instance with the specified query string.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the specified query string.
+     *
+     * Users can provide both encoded and decoded query characters.
+     * Implementations ensure the correct encoding as outlined in getQuery().
+     *
+     * An empty query string value is equivalent to removing the query string.
+     *
+     * @param string $query The query string to use with the new instance.
+     * @return static A new instance with the specified query string.
+     * @throws \InvalidArgumentException for invalid query strings.
+     */
+    public function withQuery($query)
+    {
+        $new_uri = clone $this;
+        $new_uri->setQuery($query);
+        return $new_uri;
+    }
+
+    /**
+     * Return an instance with the specified URI fragment.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the specified URI fragment.
+     *
+     * Users can provide both encoded and decoded fragment characters.
+     * Implementations ensure the correct encoding as outlined in getFragment().
+     *
+     * An empty fragment value is equivalent to removing the fragment.
+     *
+     * @param string $fragment The fragment to use with the new instance.
+     * @return static A new instance with the specified fragment.
+     */
+    public function withFragment($fragment)
+    {
+        $new_uri = clone $this;
+        $new_uri->setFragment($fragment);
+        return $new_uri;
+    }
+
+    /**
+     * Convert to Psr7Uri
+     *
+     * @return Psr7Uri
+     */
+    public function toPsr7()
+    {
+        return new Psr7Uri(clone $this);
+    }
+
+
+    static public function fromPsr7(UriInterface $uri)
+    {
+        return new static((string) $uri);
     }
 
     /**
