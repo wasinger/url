@@ -3,7 +3,7 @@
 $loader = __DIR__ . '/vendor/autoload.php';
 
 // if we are within the vendor directory of another project
-if (file_exists(__DIR__ . '/../../../vendor/autoload.php')) {
+if (!$loader && file_exists(__DIR__ . '/../../../vendor/autoload.php')) {
 	$loader = __DIR__ . '/../../../vendor/autoload.php';
 }
  
