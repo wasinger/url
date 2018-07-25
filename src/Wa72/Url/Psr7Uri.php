@@ -41,7 +41,7 @@ class Psr7Uri implements UriInterface
      * @param string $url
      * @return Psr7Uri
      */
-    static function parse(string $url)
+    static function parse($url)
     {
         return new static(Url::parse($url));
     }
