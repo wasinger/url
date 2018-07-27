@@ -31,7 +31,7 @@ Features and Usage
 ### Parse a URL to an object ###
 
 ```php
-use \Wa72\Url;
+use \Wa72\Url\Url;
 
 $url = new Url('http://my-server.com/index.php?p1=foo&p2=bar');
 // or alternatively use the static factory function `parse`:
@@ -139,7 +139,6 @@ echo $url->write(Url::WRITE_FLAG_OMIT_SCHEME | Url::WRITE_FLAG_OMIT_HOST)); // w
 
 ### Compatibility with `Psr\Http\Message\UriInterface` (PSR-7) ###
 
-
 - class `Url` now has all methods defined in this interface but does not officially implement it.
 - new wrapper class `Psr7Uri` that implements `UriInterface`
 - methods for converting between `Url` and `Psr7Uri`
@@ -149,7 +148,7 @@ Class `Url` does not implement the PSR Interface by itself for two reasons:
 2. Because the PSR interface is designed to be immutable,
     while `Url` is not.
 
-To use this feature, you need to `composer require psr/http-message`
+To use this feature, you need to `composer require psr/http-message`.
 
 ```php
 <?php
@@ -165,11 +164,13 @@ $psr7uri = $url->toPsr7();
 
 # Get a Url object from UriInterface
 
-$url = Url::fromPsr7($psr7uri);
+$url = Url::fromPsr7($psr7uri); // this works for every UriInterface object, not only Wa72\Url\Psr7Uri
 // or alternatively:
 $url = $psr7uri->toUrl();
 
+# You can also create a Psr7Uri directly
 
+$psr7uri = Psr7Uri::parse('https://www.foo.bar/test.php?a=b');
 ```
 
 ### More documentation to come ###
